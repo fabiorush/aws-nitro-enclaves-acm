@@ -21,12 +21,14 @@ pub fn kms_decrypt(
     ciphertext: &[u8],
 ) -> Result<Vec<u8>, Error> {
     // Initialize the SDK
+    println!("[xfaurqui][kms_decrypt] Passou1");
     unsafe {
         ffi::aws_nitro_enclaves_library_init(std::ptr::null_mut());
     };
 
     // Fetch allocator
     let allocator = unsafe { ffi::aws_nitro_enclaves_get_allocator() };
+    println!("[xfaurqui][kms_decrypt] Passou2");
     if allocator.is_null() {
         unsafe {
             ffi::aws_nitro_enclaves_library_clean_up();
@@ -34,6 +36,7 @@ pub fn kms_decrypt(
         return Err(Error::SdkInitError);
     }
     // REGION
+    println!("[xfaurqui][kms_decrypt] Passou3");
     let region = unsafe {
         let reg = ffi::aws_string_new_from_array(allocator, aws_region.as_ptr(), aws_region.len());
         if reg.is_null() {
@@ -42,6 +45,7 @@ pub fn kms_decrypt(
         }
         reg
     };
+    println!("[xfaurqui][kms_decrypt] Passou4");
     // ENDPOINT
     let mut endpoint = {
         let mut ep = ffi::aws_socket_endpoint {
@@ -52,6 +56,7 @@ pub fn kms_decrypt(
             .copy_from_slice(&ffi::AWS_NE_VSOCK_PROXY_ADDR);
         ep
     };
+    println!("[xfaurqui][kms_decrypt] Passou5");
     // AWS_ACCESS_KEY_ID
     let key_id = unsafe {
         let kid = ffi::aws_string_new_from_array(allocator, aws_key_id.as_ptr(), aws_key_id.len());
@@ -62,6 +67,7 @@ pub fn kms_decrypt(
         }
         kid
     };
+    println!("[xfaurqui][kms_decrypt] Passou6");
     // AWS_SECRET_ACCESS_KEY
     let secret_key = unsafe {
         let skey = ffi::aws_string_new_from_array(
@@ -77,6 +83,7 @@ pub fn kms_decrypt(
         }
         skey
     };
+    println!("[xfaurqui][kms_decrypt] Passou7");
     // AWS_SESSION_TOKEN
     let session_token = unsafe {
         let sess_token = ffi::aws_string_new_from_array(
@@ -93,6 +100,7 @@ pub fn kms_decrypt(
         }
         sess_token
     };
+    println!("[xfaurqui][kms_decrypt] Passou8");
     // Construct KMS client configuration
     let kms_client_cfg = unsafe {
         // Configure
@@ -115,6 +123,7 @@ pub fn kms_decrypt(
         }
         cfg
     };
+    println!("[xfaurqui][kms_decrypt] Passou9");
     // Construct KMS Client
     let kms_client = unsafe { ffi::aws_nitro_enclaves_kms_client_new(kms_client_cfg) };
     if kms_client.is_null() {
@@ -128,11 +137,13 @@ pub fn kms_decrypt(
         }
         return Err(Error::SdkKmsClientError);
     }
+    println!("[xfaurqui][kms_decrypt] Passou10");
     // Ciphertext
     let ciphertext_buf = unsafe {
         ffi::aws_byte_buf_from_array(ciphertext.as_ptr() as *mut ffi::c_void, ciphertext.len())
     };
 
+    println!("[xfaurqui][kms_decrypt] Passou11");
     // Decrypt
     let mut plaintext_buf: ffi::aws_byte_buf = unsafe { std::mem::zeroed() };
     let rc = unsafe {
@@ -144,6 +155,7 @@ pub fn kms_decrypt(
             &mut plaintext_buf,
         )
     };
+    println!("[xfaurqui][kms_decrypt] Passou13");
     if rc != 0 {
         unsafe {
             ffi::aws_string_destroy_secure(key_id);
@@ -156,6 +168,7 @@ pub fn kms_decrypt(
         }
         return Err(Error::SdkKmsDecryptError);
     }
+    println!("[xfaurqui][kms_decrypt] Passou14");
 
     // Cleanup
     unsafe {
@@ -167,12 +180,14 @@ pub fn kms_decrypt(
         ffi::aws_nitro_enclaves_kms_client_destroy(kms_client);
         ffi::aws_nitro_enclaves_library_clean_up();
     }
+    println!("[xfaurqui][kms_decrypt] Passou15");
 
     // Plaintext
     let plaintext = unsafe {
         std::slice::from_raw_parts(plaintext_buf.buffer, plaintext_buf.len as usize).to_vec()
     };
     unsafe { ffi::aws_byte_buf_clean_up_secure(&mut plaintext_buf) };
+    println!("[xfaurqui][kms_decrypt] Passou16");
 
     Ok(plaintext)
 }

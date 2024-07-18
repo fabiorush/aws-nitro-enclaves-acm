@@ -7,7 +7,7 @@ use std::process::Command;
 use std::rc::Rc;
 use std::time::{Duration, Instant};
 
-use log::{debug, error, info};
+use log::{error, info};
 use nix::unistd;
 use serde::{Deserialize, Serialize};
 use serde_json;
@@ -133,7 +133,7 @@ impl DbSource {
     }
 
     fn fetch_acm_db(cert_arn: &str, bucket: &str) -> Result<AcmDb, Error> {
-        debug!("Fetching cert for arn: {}", cert_arn);
+        info!("Fetching cert for arn: {}", cert_arn);
         let s3_url = format!(
             "s3://{}-ec2-enclave-certificate-{}-{}/{}/{}",
             imds::partition().map_err(Error::ImdsError)?,
@@ -244,7 +244,7 @@ impl ManagedToken {
                     self.label.as_str()
                 );
 
-                debug!("Updating token {}", self.label.as_str());
+                info!("Updating token {}", self.label.as_str());
                 self.enclave
                     .update_token(
                         self.label.clone(),
@@ -254,7 +254,7 @@ impl ManagedToken {
                     .map_err(Error::EnclaveError)?
                     .map_err(Error::UpdateTokenError)?;
 
-                debug!("Updating managed service configuration");
+                info!("Updating managed service configuration");
                 self.satisfy_target(false).or_else(|e| {
                     error!(
                         "Unable to satisfy target for token {}: {:?}",
@@ -302,7 +302,7 @@ impl ManagedToken {
                 }
             }
             (false, _, _) => {
-                debug!("Adding token {}", self.label.as_str());
+                info!("Adding token {}", self.label.as_str());
                 self.enclave
                     .add_token(self.to_schema_token()?)
                     .map_err(Error::EnclaveError)?

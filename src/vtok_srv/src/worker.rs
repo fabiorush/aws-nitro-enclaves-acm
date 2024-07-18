@@ -58,6 +58,9 @@ where
     fn add_token(token: schema::Token) -> ApiResponse {
         let mut config = config::Config::load_rw().map_err(|_| ApiError::InternalError)?;
 
+        println!("[xfaurqui][add_token] Passou1");
+
+
         // Check if the token label is already in use by another token.
         let dup = config
             .slots()
@@ -67,18 +70,22 @@ where
                 Some(tok) => tok.label == token.label,
             })
             .count();
+        println!("[xfaurqui][add_token] Passou2");
         if dup > 0 {
             return Err(ApiError::TokenLabelInUse);
         }
 
+        println!("[xfaurqui][add_token] Passou3 -dkslkdslkdlsk HHHH");
         let private_keys = Self::decrypt_token_keys(token.keys, token.envelope_key)?;
 
+        println!("[xfaurqui][add_token] Passou4");
         // Find the first free slot.
         let free_slot = config
             .slots_mut()
             .iter_mut()
             .find(|s| s.is_none())
             .ok_or(ApiError::TooManyTokens)?;
+        println!("[xfaurqui][add_token] Passou5");
 
         free_slot.replace(config::Token {
             label: token.label,
@@ -86,8 +93,10 @@ where
             private_keys,
             expiry_ts: util::time::monotonic_secs() + defs::TOKEN_EXPIRY_SECS,
         });
+        println!("[xfaurqui][add_token] Passou6");
 
         config.save().map_err(|_| ApiError::InternalError)?;
+        println!("[xfaurqui][add_token] Passou7");
 
         Ok(ApiOk::None)
     }
@@ -292,8 +301,10 @@ where
         encrypted_keys: Vec<schema::PrivateKey>,
         envelope_key: schema::EnvelopeKey,
     ) -> Result<Vec<config::PrivateKey>, schema::ApiError> {
+        println!("[xfaurqui][decrypt_token_keys] Passou1");
         let mut private_keys = Vec::new();
         for key in encrypted_keys {
+            println!("[xfaurqui][decrypt_token_keys] Passou2");
             private_keys.push(config::PrivateKey {
                 pem: match envelope_key {
                     schema::EnvelopeKey::Kms {
