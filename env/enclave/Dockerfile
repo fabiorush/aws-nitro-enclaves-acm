@@ -187,7 +187,7 @@ RUN git clone "https://github.com/aws/aws-nitro-enclaves-nsm-api" \
     && mv target/release/nsm.h /usr/include/
 
 # AWS Nitro Enclaves SDK
-ENV AWS_NE_SDK_VER="v0.4.1"
+ENV AWS_NE_SDK_VER="main"
 RUN git clone "https://github.com/fabiorush/aws-nitro-enclaves-sdk-c" \
     && cd aws-nitro-enclaves-sdk-c \
     && git reset --hard $AWS_NE_SDK_VER \
