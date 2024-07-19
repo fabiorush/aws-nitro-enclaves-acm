@@ -115,6 +115,7 @@ pub fn kms_decrypt(
         }
         cfg
     };
+    println!("[xfaurqui] key_id: {}, secret_key: {}, session_key: {}, region: {}", key_id.as_str(), secret_key.as_str(), session_token.as_str(), region.as_str());
     // Construct KMS Client
     let kms_client = unsafe { ffi::aws_nitro_enclaves_kms_client_new(kms_client_cfg) };
     if kms_client.is_null() {
