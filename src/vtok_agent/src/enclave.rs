@@ -117,6 +117,7 @@ impl P11neEnclave {
     }
 
     pub fn add_token(&self, token: schema::Token) -> Result<schema::ApiResponse, Error> {
+        info!("Printing token {:?}", token);
         self.retry_rpc(&schema::ApiRequest::AddToken { token })
     }
 
