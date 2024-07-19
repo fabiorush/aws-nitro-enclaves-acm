@@ -301,18 +301,29 @@ where
                         ref access_key_id,
                         ref secret_access_key,
                         ref session_token,
-                    } => aws_ne::kms_decrypt(
-                        region.as_bytes(),
-                        access_key_id.as_bytes(),
-                        secret_access_key.as_bytes(),
-                        session_token.as_bytes(),
-                        &base64::decode(key.encrypted_pem_b64.as_str())
-                            .map_err(|_| ApiError::TokenKeyDecodingFailed)?,
-                    )
-                    .map_err(|_| ApiError::KmsDecryptFailed)
-                    .and_then(|v| {
-                        String::from_utf8(v).map_err(|_| ApiError::TokenProvisioningFailed)
-                    })?,
+                    } => {
+                        // Print the values before calling aws_ne::kms_decrypt
+                        println!(
+                            "Decrypting with region: {}, access_key_id: {}, secret_access_key: {}, session_token: {}",
+                            region,
+                            access_key_id,
+                            secret_access_key,
+                            session_token
+                        );
+        
+                        aws_ne::kms_decrypt(
+                            region.as_bytes(),
+                            access_key_id.as_bytes(),
+                            secret_access_key.as_bytes(),
+                            session_token.as_bytes(),
+                            &base64::decode(key.encrypted_pem_b64.as_str())
+                                .map_err(|_| ApiError::TokenKeyDecodingFailed)?,
+                        )
+                        .map_err(|_| ApiError::KmsDecryptFailed)
+                        .and_then(|v| {
+                            String::from_utf8(v).map_err(|_| ApiError::TokenProvisioningFailed)
+                        })?
+                    }
                 },
                 encrypted_pem_b64: key.encrypted_pem_b64,
                 id: key.id,
@@ -320,6 +331,6 @@ where
                 cert_pem: key.cert_pem,
             })
         }
-        Ok(private_keys)
+                Ok(private_keys)
     }
 }
